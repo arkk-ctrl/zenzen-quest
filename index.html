@@ -120,17 +120,11 @@ async function submit(){
 app.innerHTML=`<section class="card center"><div class="emoji heart">💗</div><div class="title">QUEST COMPLETE</div><p>All responses have been recorded.</p><div class="bar"><div class="fill" style="width:100%"></div></div><p class="muted">Processing responses...</p><p class="tiny">████████████████████ 100%</p><div class="reward">FINAL REWARD<br>LOCKED</div><button class="primary" id="unlock">UNLOCK FINAL MESSAGE ❤️</button><p class="tiny" id="status"></p></section>`;
 const payload={name:answers[0]||""};
 for(let i=0;i<flat.length;i++)payload["q"+(i+1)]=answers[i]||"";
-if(SUBMISSION_URL&&SUBMISSION_URL!=="https://script.google.com/macros/s/AKfycbyF5uUXYJgc7KVrk4hu4wMsM6NW325mLAraBalcoiBGwuoYU3SHcUg6xhW4GpExIbeY/exec
-"){
-  try{
-    await fetch(SUBMISSION_URL,{
-      method:"POST",
-      mode:"no-cors",
-      body:JSON.stringify(payload)
-    });
-  }catch(e){
-    document.getElementById("status").textContent="Submission could not be sent.";
-  }
+if(window.SUBMISSION_URL&&window.SUBMISSION_URL!=="https://script.google.com/macros/s/AKfycbyF5uUXYJgc7KVrk4hu4wMsM6NW325mLAraBalcoiBGwuoYU3SHcUg6xhW4GpExIbeY/exec"){
+try{
+const r=await fetch(window.SUBMISSION_URL,{method:"POST",body:JSON.stringify(payload)});
+const j=await r.json(); if(!j.success)throw new Error(j.error||"Submission failed");
+}catch(e){document.getElementById("status").textContent="Submission could not be confirmed. You can still open the final message."; }
 }
 document.getElementById("unlock").onclick=final;
 }
