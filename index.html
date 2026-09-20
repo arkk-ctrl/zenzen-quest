@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zenzen — One Week Quest</title>
+<style>
+:root{--bg:#0d0d14;--panel:#171722;--card:#20202d;--text:#f7f5fb;--muted:#aaa8b7;--accent:#ff7aa8;--accent2:#ffb6ce;--border:#373746}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#281522 0,#0d0d14 42%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{width:min(100%,620px);margin:auto;padding:18px 14px 40px}.card{background:rgba(23,23,34,.96);border:1px solid var(--border);border-radius:24px;padding:22px;box-shadow:0 18px 50px #0005}
+.center{text-align:center}.emoji{font-size:52px;margin:8px 0 16px}.title{font-size:30px;font-weight:900;letter-spacing:-1px}.subtitle{font-size:17px;font-weight:700;margin-top:5px}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}
+.bar{height:8px;background:#2b2b38;border-radius:99px;overflow:hidden;margin:14px 0 5px}.fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width .25s}
+.section{font-size:12px;font-weight:900;color:var(--accent2);letter-spacing:.8px}.q{font-size:20px;font-weight:850;line-height:1.3;margin-top:8px}
+.choice,.primary,.secondary{width:100%;min-height:48px;border-radius:14px;font-size:15px;font-weight:750;margin-top:10px;padding:12px 14px;cursor:pointer}
+.choice{background:var(--card);color:var(--text);border:1px solid var(--border);text-align:left}.choice.selected{border-color:var(--accent);background:#3a202d}
+.primary{background:var(--accent);color:#260b17;border:0}.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+input,textarea{width:100%;font:inherit;font-size:16px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:13px;margin-top:12px;outline:none}
+textarea{min-height:125px;resize:vertical}.error{color:#ff9bb9;font-size:13px;margin-top:9px;min-height:18px}
+.reward{font-size:38px;font-weight:900;color:var(--accent2);margin:16px 0}.message{line-height:1.75;font-size:15px}.message p{margin:0 0 16px}
+.heart{display:inline-block;animation:beat 1.15s infinite}@keyframes beat{50%{transform:scale(1.12)}}
+@media(prefers-reduced-motion:reduce){.heart{animation:none}.fill{transition:none}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const SUBMISSION_URL="https://script.google.com/macros/s/AKfycbyF5uUXYJgc7KVrk4hu4wMsM6NW325mLAraBalcoiBGwuoYU3SHcUg6xhW4GpExIbeY/exec";
+const QUESTIONS = [
+["LEVEL 1 — INITIALIZE","📝",[
+["Name / nickname:","text"],
+["How are you feeling right now?",["Happy","Sleepy","Hungry","In love","All of the above somehow"]],
+["Current relationship status:",["Just friends","It’s complicated","We’re dating","I’m happily taken","Ask my boyfriend 😭"]],
+["How would you rate your current level of affection for your boyfriend?",["⭐ 1 — very low","⭐ 2","⭐ 3","⭐ 4","⭐ 5 — extremely dangerous"]],
+["Before continuing, are you ready for some extremely important questions?",["Yes","Absolutely","Unfortunately yes","I have no idea what I’m getting myself into"]]
+]],
+["LEVEL 2 — ABOUT US","♡",[
+["What kind of couple do you think we are?",["Chaotic but cute","Soft and clingy","Best friends who accidentally fell in love","A little bit of everything","We’re still figuring it out"]],
+["Which activity would you most want to do together?",["Late-night talks","Go on dates","Take random pictures","Eat somewhere together","Stay home and do absolutely nothing together"]],
+["Which one sounds most like us?",["Laughing at something stupid","Talking until way too late","Randomly becoming serious","Being sweet for no reason","All of these"]],
+["What makes a conversation with your boyfriend special to you?",["The random topics","The reassurance","The jokes","Being able to talk about anything","Just having him there"]],
+["How comfortable do you feel being completely yourself around him?",["1 — not very comfortable","2","3","4","5 — completely myself"]],
+["What is one thing about us that you want to keep forever?","text"],
+["What is one thing you’d like us to experience together?","text"]
+]],
+["LEVEL 3 — THE BOYFRIEND TEST","🎮",[
+["When your boyfriend doesn’t know what to say, what is he most likely to do?",["Overthink","Type something and delete it","Ask what you’re feeling","Say something awkward","All of the above 😭"]],
+["What is he most likely to randomly talk about?",["Games","Gundam / Gunpla","Random nonsense","Something he suddenly remembered","Literally anything"]],
+["What is his most obvious boyfriend trait?",["Being clingy","Being protective","Being sleepy","Overthinking","Trying way too hard to make you smile"]],
+["If he sends you a ridiculously long message at an unreasonable hour, what should you assume?",["He can’t sleep","He misses me","He is overthinking again","He loves me","Probably all four"]],
+["Which response best describes him when he realizes he made a mistake?",["Immediately apologizes","Tries to explain himself","Overthinks everything","Wants to fix it","Some combination of these"]],
+["What is something your boyfriend does that secretly makes you smile?","text"],
+["What is one thing you think your boyfriend should know about you?","text"]
+]],
+["LEVEL 4 — THE REAL QUESTIONS","❤️",[
+["What makes you feel most loved?",["Words of affirmation","Quality time","Acts of service","Physical affection","Consistency and reassurance","A little bit of everything"]],
+["When you’re having a bad day, what do you usually want from your partner?",["Someone to listen","Reassurance","Space","Distraction","Affection","It depends on the day"]],
+["How important is communication when something is bothering you?",["1 — not very important","2","3","4","5 — extremely important"]],
+["What is something you want your boyfriend to understand better about you?","text"],
+["Is there anything that makes you feel insecure or uncertain in a relationship that you’d like him to understand?","text"],
+["What is one thing your boyfriend does that makes you feel safe, valued, or reassured?","text"],
+["What is one thing you hope you never lose between the two of you?","text"]
+]],
+["LEVEL 5 — ONE WEEK CHECK-IN","🌙",[
+["Describe your relationship so far in three words.","text"],
+["What has been your favorite memory with your boyfriend so far?","text"],
+["What is something that surprised you about dating him?","text"],
+["What is something you want more of in your relationship?",["More dates","More calls","More late-night conversations","More pictures together","More affection","More random nonsense","More time together"]],
+["What are you looking forward to most with him?","text"],
+["What would you want your next month together to look like?","text"],
+["Is there anything you’ve been wanting to tell your boyfriend but haven’t said yet?","text"],
+["Final answer: are you happy that you gave this relationship a chance?",["Yes","Definitely yes","Very much yes","Why are there so many yes options 😭"]]
+]]
+];
+
+const LOVE_LETTER = [
+"hello babyyy koooooo, i know you're sleeping right now but,",
+"happy one week to us, lovelove ko. 🥹❤️",
+"i know one week might sound small compared to how long some relationships have lasted, but honestly, i don't want to measure what we have just by the number of days. even in this short amount of time, you've already become someone incredibly important to me, and i'm genuinely so thankful that i get to call you my girlfriend.",
+"thank you for giving me a chance. thank you for trusting me enough to let me into your life in a different way than before. i know opening your heart isn't always easy, and i don't ever want to treat the trust you've given me like it's something ordinary. i appreciate it more than i probably know how to explain.",
+"and i also want to say sorry for the moments when i don't know what to say or what to do. sometimes i overthink, sometimes i get scared that i'll say the wrong thing, and sometimes i genuinely don't know how to handle a situation properly. but please know that even when i don't have the perfect words, i still care. i'm still listening. i'm still trying. and i'll keep learning how to love you in the way that makes you feel safe, appreciated, and understood.",
+"i don't expect myself to know everything about you immediately. i want to learn you slowly — your little habits, the things that make you happy, the things that bother you, the things you don't always say out loud, the things you're scared of, the things you dream about, and even the random little things that make you you.",
+"i want you to know that you're not someone i'm comparing to anybody from my past. you're not a replacement, you're not a second choice, and you're not someone i'm with just because of what happened before you. you're you. and i chose you.",
+"i chose the girl who became my homegirl, the girl i started catching feelings for, the girl who somehow went from someone i could casually talk to into someone i genuinely couldn't imagine not having in my life anymore. and now i get to call you my girl. that's still crazy to me. 😭",
+"i'll probably mess up sometimes. i'll probably be awkward sometimes. i'll probably overthink some absolutely unnecessary things at 3 AM. but i don't want perfection from us. i want honesty. i want communication. i want us to be able to tell each other when something hurts, when something feels wrong, when something makes us happy, and when we simply need a little more love.",
+"i want to make more memories with you. more random conversations, more stupid jokes, more late-night talks, more good morning and goodnight messages, more dates, more pictures, more moments where we're doing absolutely nothing but somehow having the best time anyway.",
+"and honestly, i'm just really, really happy you're here.",
+"thank you for choosing me too, babyyy. thank you for letting me love you. thank you for being patient with me. thank you for every little effort you make, even the ones you probably think i don't notice. i notice them. i appreciate them. and i appreciate you.",
+"one week down, lovelove. i hope this is only the beginning of something we get to keep building together.",
+"i love you, Zenzen. more than these words can properly explain. ❤️",
+"happy one week, babyyy koooooo. here's to us. 🫶🏻❤️"
+];
+
+const app=document.getElementById("app");
+let flat=[],idx=0,answers={};
+QUESTIONS.forEach((s,li)=>s[2].forEach((q,qi)=>flat.push({li,qi,section:s[0],emoji:s[1],q:q[0],type:q[1]})));
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function start(){
+app.innerHTML=`<section class="card center"><div class="emoji">💌</div><div class="title">ZENZEN.EXE</div><div class="subtitle">ONE WEEK QUEST</div><p class="muted">A completely serious and definitely scientifically accurate relationship mini-game.</p><div class="card" style="margin-top:18px;background:var(--card)"><b>MISSION</b><p class="tiny">Answer honestly. There are no wrong answers. Probably.</p></div><button class="primary" id="go">START QUEST ♡</button></section>`;
+document.getElementById("go").onclick=render;
+}
+function render(){
+const x=flat[idx], section=QUESTIONS[x.li], pct=Math.round(idx/flat.length*100);
+let body="";
+if(x.type==="text"){
+body=`<textarea id="ans" placeholder="Type your answer here...">${escapeHtml(answers[idx]||"")}</textarea>`;
+}else{
+body=section[2][x.qi][1].map(v=>`<button class="choice ${answers[idx]===v?"selected":""}" data-v="${escapeHtml(v)}">${escapeHtml(v)}</button>`).join("");
+}
+app.innerHTML=`<section class="card"><div class="section">${escapeHtml(x.section)}</div><div class="emoji" style="font-size:34px">${x.emoji}</div><div class="q">${escapeHtml(x.q)}</div><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="tiny">Question ${idx+1} of ${flat.length}</div><div style="margin-top:12px">${body}</div><div class="error" id="err"></div><button class="primary" id="next">${idx===flat.length-1?"SUBMIT QUEST ❤️":"NEXT →"}</button></section>`;
+if(x.type!=="text")document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{document.querySelectorAll(".choice").forEach(z=>z.classList.remove("selected"));b.classList.add("selected");answers[idx]=b.dataset.v;});
+document.getElementById("next").onclick=()=>{
+let v=x.type==="text"?document.getElementById("ans").value.trim():answers[idx];
+if(!v){document.getElementById("err").textContent="Please answer this one before continuing ❤️";return}
+answers[idx]=v;
+if(idx<flat.length-1){idx++;render()}else{submit();}
+};
+}
+async function submit(){
+app.innerHTML=`<section class="card center"><div class="emoji heart">💗</div><div class="title">QUEST COMPLETE</div><p>All responses have been recorded.</p><div class="bar"><div class="fill" style="width:100%"></div></div><p class="muted">Processing responses...</p><p class="tiny">████████████████████ 100%</p><div class="reward">FINAL REWARD<br>LOCKED</div><button class="primary" id="unlock">UNLOCK FINAL MESSAGE ❤️</button><p class="tiny" id="status"></p></section>`;
+const payload={name:answers[0]||""};
+for(let i=0;i<flat.length;i++)payload["q"+(i+1)]=answers[i]||"";
+if(SUBMISSION_URL&&SUBMISSION_URL!=="https://script.google.com/macros/s/AKfycbyF5uUXYJgc7KVrk4hu4wMsM6NW325mLAraBalcoiBGwuoYU3SHcUg6xhW4GpExIbeY/exec
+"){
+  try{
+    await fetch(SUBMISSION_URL,{
+      method:"POST",
+      mode:"no-cors",
+      body:JSON.stringify(payload)
+    });
+  }catch(e){
+    document.getElementById("status").textContent="Submission could not be sent.";
+  }
+}
+document.getElementById("unlock").onclick=final;
+}
+function final(){
+app.innerHTML=`<section class="card"><div class="center"><div class="emoji">💌</div><div class="title">FINAL REWARD UNLOCKED</div><div class="tiny">ONE WEEK WITH YOU</div></div><div class="message" style="margin-top:18px">${LOVE_LETTER.map(p=>`<p>${escapeHtml(p)}</p>`).join("")}</div></section>`;
+}
+start();
+</script>
+</main>
+</body>
+</html>
